@@ -54,7 +54,7 @@ def generate_maze(grid_size):
 
     return grid, start, end
 
-def draw_grid(canvas, grid, start, end):
+def draw_maze(canvas, grid, start, end, path=None):
     # Draw the cells and their borders on the canvas
     for i in range(GRID_SIZE):
         for j in range(GRID_SIZE):
@@ -72,6 +72,10 @@ def draw_grid(canvas, grid, start, end):
                 canvas.create_line(x1, y1, x1, y2, width=2)
             if grid[i][j]['right']:
                 canvas.create_line(x2, y1, x2, y2, width=2)
+
+            # Highlight the path if it is given and the current cell is in the path
+            if path and (i, j) in path:
+                canvas.create_rectangle(x1+1, y1+1, x2-1, y2-1, fill='yellow')
 
     # Mark the start and end positions
     canvas.create_rectangle(CELL_SIZE*start[0], CELL_SIZE*start[1], CELL_SIZE*(start[0]+1), CELL_SIZE*(start[1]+1), fill='green')
@@ -98,7 +102,7 @@ def main():
     grid, start, end = load_maze(MAZE_FILE_PATH)
 
     # Draw the maze on the canvas
-    draw_grid(canvas, grid, start, end)
+    draw_maze(canvas, grid, start, end)
 
     # Start the main tkinter loop
     window.mainloop()

@@ -1,5 +1,7 @@
 import json
 
+from create_maze import create_canvas, draw_maze
+
 RES_DIR_PATH = '../res'
 MAZE_FILE_PATH = f'{RES_DIR_PATH}/maze.json'
 
@@ -45,4 +47,12 @@ def print_path(path):
 if __name__ == '__main__':
     grid, start, end = load_maze(MAZE_FILE_PATH)
     path = depth_first_search(grid, start, end)
-    print_path(path)
+
+    # Create the canvas
+    window, canvas = create_canvas()
+
+    # Draw the maze on the canvas
+    draw_maze(canvas, grid, start, end, path=path)
+
+    # Start the main tkinter loop
+    window.mainloop()
