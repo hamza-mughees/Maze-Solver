@@ -73,9 +73,9 @@ def draw_maze(canvas, grid, start, end, path=None):
             if grid[i][j]['right']:
                 canvas.create_line(x2, y1, x2, y2, width=2)
 
-            # Highlight the path if it is given and the current cell is in the path
+            # Highlight the path if it is given and if the current cell is in the path
             if path and (i, j) in path:
-                canvas.create_rectangle(x1+1, y1+1, x2-1, y2-1, fill='yellow')
+                canvas.create_rectangle(x1, y1, x2, y2, fill='yellow')
 
     # Mark the start and end positions
     canvas.create_rectangle(CELL_SIZE*start[0], CELL_SIZE*start[1], CELL_SIZE*(start[0]+1), CELL_SIZE*(start[1]+1), fill='green')
