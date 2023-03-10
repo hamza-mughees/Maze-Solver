@@ -84,6 +84,90 @@ def a_star(maze, start, end):
                 
     return None
 
+def mdp_value_iteration(maze, start, end):
+    # visited = set()
+
+    def valid_actions(s):
+        x, y = s
+        A = set()
+
+        if y > 0 and not maze[x][y]['top']:
+            A.add((0, -1))
+        if y < len(maze[0]) - 1 and not maze[x][y]['bottom']:
+            A.add((0, 1))
+        if x > 0 and not maze[x][y]['left']:
+            A.add((-1, 0))
+        if x < len(maze) - 1 and not maze[x][y]['right']:
+            A.add((1, 0))
+            
+        return A
+        
+    def transition_prob(s_next, s, a):
+        x, y = s
+        dx, dy = a
+        x_next, y_next = s_next
+
+        if (x+dx, y+dy) == (x_next, y_next):
+            return 1
+        else:
+            return 0
+        
+    def reward(s, a):
+        x, y = s
+        dx, dy = a
+
+        if (x+dx, y+dy) == tuple(end):
+            return 100
+        # elif (x+dx, y+dy) in visited:
+        #     return -50  # Negative reward for revisiting a visited cell
+        else:
+            return -1
+
+    S = set((x, y) for x in range(len(maze)) for y in range(len(maze[0])))
+    A = valid_actions
+    P = transition_prob
+    R = reward
+
+    def value_iteration(S, A, P, R, gamma=0.9):
+        V = {s: 0 for s in S}
+        optimal_policy = {s: 0 for s in S}
+
+        while True:
+            oldV = V.copy()
+
+            for s in S:
+                # visited.add(s)
+                Q = {}
+
+                for a in A(s):
+                    Q[a] = R(s, a) + gamma * sum(P(s_next, s, a) * oldV[s_next] for s_next in S)
+                    
+                V[s] = max(Q.values())
+                optimal_policy[s] = max(Q, key=Q.get)
+                print(f'{s}: {optimal_policy[s]}')
+                
+            if all(oldV[s] == V[s] for s in S):
+                break
+            # else:
+            #     visited.clear()
+            
+        return V, optimal_policy
+    
+    V, optimal_policy = value_iteration(S, A, P, R)
+
+    # Get the optimal path
+    s = tuple(start)
+    path = [s]
+    while s != tuple(end):
+        print(s)
+        a = optimal_policy[s]
+        dx, dy = a
+        s_next = (s[0] + dx, s[1] + dy)
+        path.append(s_next)
+        s = s_next
+
+    return path
+
 def print_path(path):
     if path is None:
         print("No path found!")
@@ -100,7 +184,7 @@ if __name__ == '__main__':
     window, canvas = create_canvas()
 
     # Draw the maze on the canvas
-    draw_maze(canvas, grid, start, end, path=path)
+    draw_maze(canvas, grid, start, end, path=path[:-1])
 
     # Start the main tkinter loop
     window.mainloop()

@@ -3,8 +3,8 @@ import random
 import json
 
 # Set up the grid size and cell size
-GRID_SIZE = 25
-CELL_SIZE = 20
+GRID_SIZE = 10
+CELL_SIZE = 40
 
 RES_DIR_PATH = '../res'
 MAZE_FILE_PATH = f'{RES_DIR_PATH}/maze.json'
@@ -75,11 +75,24 @@ def draw_maze(canvas, grid, start, end, path=None):
 
             # Highlight the path if it is given and if the current cell is in the path
             if path and (i, j) in path:
-                canvas.create_rectangle(x1, y1, x2, y2, fill='yellow')
+                canvas.create_rectangle(x1, y1, x2, y2, fill='yellow', outline='')
 
     # Mark the start and end positions
-    canvas.create_rectangle(CELL_SIZE*start[0], CELL_SIZE*start[1], CELL_SIZE*(start[0]+1), CELL_SIZE*(start[1]+1), fill='green')
-    canvas.create_rectangle(CELL_SIZE*end[0], CELL_SIZE*end[1], CELL_SIZE*(end[0]+1), CELL_SIZE*(end[1]+1), fill='red')
+    MARGIN_SIZE = (1/4)*CELL_SIZE
+    canvas.create_rectangle(
+        CELL_SIZE*start[0] + MARGIN_SIZE,
+        CELL_SIZE*start[1] + MARGIN_SIZE,
+        CELL_SIZE*(start[0]+1) - MARGIN_SIZE,
+        CELL_SIZE*(start[1]+1) - MARGIN_SIZE,
+        fill='green', outline=''
+    )
+    canvas.create_rectangle(
+        CELL_SIZE*end[0] + MARGIN_SIZE,
+        CELL_SIZE*end[1] + MARGIN_SIZE,
+        CELL_SIZE*(end[0]+1) - MARGIN_SIZE,
+        CELL_SIZE*(end[1]+1) - MARGIN_SIZE,
+        fill='red', outline=''
+    )
 
 def save_maze(grid, start, end, file_path):
     with open(file_path, 'w') as f:
