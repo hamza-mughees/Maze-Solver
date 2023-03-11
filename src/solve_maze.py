@@ -84,50 +84,51 @@ def a_star(maze, start, end):
                 
     return None
 
+def valid_actions(maze, s):
+    x, y = s
+    A = set()
+
+    if y > 0 and not maze[x][y]['top']:
+        A.add((0, -1))
+    if y < len(maze[0]) - 1 and not maze[x][y]['bottom']:
+        A.add((0, 1))
+    if x > 0 and not maze[x][y]['left']:
+        A.add((-1, 0))
+    if x < len(maze) - 1 and not maze[x][y]['right']:
+        A.add((1, 0))
+        
+    return A
+    
+def transition_prob(s_next, s, a):
+    x, y = s
+    dx, dy = a
+    x_next, y_next = s_next
+
+    if (x+dx, y+dy) == (x_next, y_next):
+        return 1
+    else:
+        return 0
+    
+def reward(s, a):
+    x, y = s
+    dx, dy = a
+
+    if (x+dx, y+dy) == tuple(end):
+        return 100
+    # elif (x+dx, y+dy) in visited:
+    #     return -50  # Negative reward for revisiting a visited cell
+    else:
+        return -1
+
 def mdp_value_iteration(maze, start, end):
     # visited = set()
-
-    def valid_actions(s):
-        x, y = s
-        A = set()
-
-        if y > 0 and not maze[x][y]['top']:
-            A.add((0, -1))
-        if y < len(maze[0]) - 1 and not maze[x][y]['bottom']:
-            A.add((0, 1))
-        if x > 0 and not maze[x][y]['left']:
-            A.add((-1, 0))
-        if x < len(maze) - 1 and not maze[x][y]['right']:
-            A.add((1, 0))
-            
-        return A
-        
-    def transition_prob(s_next, s, a):
-        x, y = s
-        dx, dy = a
-        x_next, y_next = s_next
-
-        if (x+dx, y+dy) == (x_next, y_next):
-            return 1
-        else:
-            return 0
-        
-    def reward(s, a):
-        x, y = s
-        dx, dy = a
-
-        if (x+dx, y+dy) == tuple(end):
-            return 100
-        # elif (x+dx, y+dy) in visited:
-        #     return -50  # Negative reward for revisiting a visited cell
-        else:
-            return -1
 
     S = set((x, y) for x in range(len(maze)) for y in range(len(maze[0])))
     A = valid_actions
     P = transition_prob
     R = reward
 
+    # https://www.youtube.com/watch?v=hUqeGLkx_zs
     def value_iteration(S, A, P, R, gamma=0.9):
         V = {s: 0 for s in S}
         optimal_policy = {s: 0 for s in S}
@@ -139,12 +140,11 @@ def mdp_value_iteration(maze, start, end):
                 # visited.add(s)
                 Q = {}
 
-                for a in A(s):
+                for a in A(maze, s):
                     Q[a] = R(s, a) + gamma * sum(P(s_next, s, a) * oldV[s_next] for s_next in S)
                     
                 V[s] = max(Q.values())
                 optimal_policy[s] = max(Q, key=Q.get)
-                print(f'{s}: {optimal_policy[s]}')
                 
             if all(oldV[s] == V[s] for s in S):
                 break
@@ -159,7 +159,71 @@ def mdp_value_iteration(maze, start, end):
     s = tuple(start)
     path = [s]
     while s != tuple(end):
-        print(s)
+        a = optimal_policy[s]
+        dx, dy = a
+        s_next = (s[0] + dx, s[1] + dy)
+        path.append(s_next)
+        s = s_next
+
+    return path
+
+def mdp_policy_iteration(maze, start, end):
+    S = set((x, y) for x in range(len(maze)) for y in range(len(maze[0])))
+    A = valid_actions
+    P = transition_prob
+    R = reward
+
+    # https://www.youtube.com/watch?v=RlugupBiC6w
+    def policy_evaluation(policy, S, P, R, gamma):
+        V = {s: 0 for s in S}
+
+        while True:
+            oldV = V.copy()
+
+            for s in S:
+                a = policy[s]
+                V[s] = R(s, a) + gamma * sum(P(s_next, s, a) * oldV[s_next] for s_next in S)
+            
+            if all(oldV[s] == V[s] for s in S):
+                break
+        
+        return V
+    
+    # https://www.youtube.com/watch?v=RlugupBiC6w
+    def policy_improvement(V, S, A, P, R, gamma):
+        policy = {s: (0, 0) for s in S}
+
+        for s in S:
+            Q = {}
+
+            for a in A(maze, s):
+                Q[a] = R(s, a) + gamma * sum(P(s_next, s, a) * V[s_next] for s_next in S)
+            
+            policy[s] = max(Q, key=Q.get)
+        
+        return policy
+
+    # https://www.youtube.com/watch?v=RlugupBiC6w
+    def policy_iteration(S, A, P, R, gamma=0.9):
+        policy = {s: (0, 0) for s in S}
+
+        while True:
+            old_policy = policy.copy()
+
+            V = policy_evaluation(policy, S, P, R, gamma)
+            policy = policy_improvement(V, S, A, P, R, gamma)
+
+            if all(old_policy[s] == policy[s] for s in S):
+                break
+        
+        return policy
+    
+    optimal_policy = policy_iteration(S, A, P, R)
+
+    # Get the optimal path
+    s = tuple(start)
+    path = [s]
+    while s != tuple(end):
         a = optimal_policy[s]
         dx, dy = a
         s_next = (s[0] + dx, s[1] + dy)
@@ -178,13 +242,13 @@ def print_path(path):
 
 if __name__ == '__main__':
     grid, start, end = load_maze(MAZE_FILE_PATH)
-    path = a_star(grid, start, end)
+    path = mdp_policy_iteration(grid, start, end)
 
     # Create the canvas
     window, canvas = create_canvas()
 
     # Draw the maze on the canvas
-    draw_maze(canvas, grid, start, end, path=path[:-1])
+    draw_maze(canvas, grid, start, end, path=path)
 
     # Start the main tkinter loop
     window.mainloop()
