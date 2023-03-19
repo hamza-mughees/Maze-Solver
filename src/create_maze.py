@@ -1,7 +1,6 @@
 import tkinter as tk
 import random
 import json
-import sys
 import argparse
 
 RES_DIR_PATH = '../res'
