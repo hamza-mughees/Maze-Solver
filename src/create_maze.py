@@ -1,22 +1,25 @@
 import tkinter as tk
 import random
 import json
-
-# Set up the grid size and cell size
-GRID_SIZE = 10
-CELL_SIZE = 40
+import sys
+import argparse
 
 RES_DIR_PATH = '../res'
 MAZE_FILE_PATH = f'{RES_DIR_PATH}/maze.json'
+CONFIG_FILE_PATH = f'{RES_DIR_PATH}/config.json'
 
-def create_canvas():
+def save_config(data, file_path):
+    with open(file_path, 'w') as f:
+        json.dump(data, f)
+
+def create_canvas(cell_size, grid_size):
     # Create the tkinter window and canvas
     window = tk.Tk()
-    canvas = tk.Canvas(window, width=CELL_SIZE*GRID_SIZE, height=CELL_SIZE*GRID_SIZE)
+    canvas = tk.Canvas(window, width=cell_size*grid_size, height=cell_size*grid_size)
     canvas.pack()
     return window, canvas
 
-def generate_maze(grid_size):
+def generate_maze(cell_size, grid_size):
     # Create the grid as a 2D list of cells
     grid = [[{'top': True, 'bottom': True, 'left': True, 'right': True} for _ in range(grid_size)] for _ in range(grid_size)]
 
@@ -54,14 +57,14 @@ def generate_maze(grid_size):
 
     return grid, start, end
 
-def draw_maze(canvas, grid, start, end, path=None):
+def draw_maze(canvas, cell_size, grid_size, grid, start, end, path=None):
     # Draw the cells and their borders on the canvas
-    for i in range(GRID_SIZE):
-        for j in range(GRID_SIZE):
-            x1 = i * CELL_SIZE
-            y1 = j * CELL_SIZE
-            x2 = x1 + CELL_SIZE
-            y2 = y1 + CELL_SIZE
+    for i in range(grid_size):
+        for j in range(grid_size):
+            x1 = i * cell_size
+            y1 = j * cell_size
+            x2 = x1 + cell_size
+            y2 = y1 + cell_size
 
             # Draw the walls of each cell based on the grid
             if grid[i][j]['top']:
@@ -78,19 +81,19 @@ def draw_maze(canvas, grid, start, end, path=None):
                 canvas.create_rectangle(x1, y1, x2, y2, fill='yellow', outline='')
 
     # Mark the start and end positions
-    MARGIN_SIZE = (1/4)*CELL_SIZE
+    MARGIN_SIZE = (1/4)*cell_size
     canvas.create_rectangle(
-        CELL_SIZE*start[0] + MARGIN_SIZE,
-        CELL_SIZE*start[1] + MARGIN_SIZE,
-        CELL_SIZE*(start[0]+1) - MARGIN_SIZE,
-        CELL_SIZE*(start[1]+1) - MARGIN_SIZE,
+        cell_size*start[0] + MARGIN_SIZE,
+        cell_size*start[1] + MARGIN_SIZE,
+        cell_size*(start[0]+1) - MARGIN_SIZE,
+        cell_size*(start[1]+1) - MARGIN_SIZE,
         fill='green', outline=''
     )
     canvas.create_rectangle(
-        CELL_SIZE*end[0] + MARGIN_SIZE,
-        CELL_SIZE*end[1] + MARGIN_SIZE,
-        CELL_SIZE*(end[0]+1) - MARGIN_SIZE,
-        CELL_SIZE*(end[1]+1) - MARGIN_SIZE,
+        cell_size*end[0] + MARGIN_SIZE,
+        cell_size*end[1] + MARGIN_SIZE,
+        cell_size*(end[0]+1) - MARGIN_SIZE,
+        cell_size*(end[1]+1) - MARGIN_SIZE,
         fill='red', outline=''
     )
 
@@ -104,9 +107,24 @@ def load_maze(file_path):
         return data['grid'], data['start'], data['end']
     
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--grid', type=int, help='Select the grid size')
+    parser.add_argument('--cell', type=int, help='Select the cell size')
+    args = parser.parse_args()
+
+    grid_size = args.grid
+    cell_size = args.cell
+
+    # Update the configuration file with the new grid size and cell size values
+    config_data = {
+        "grid_size": grid_size,
+        "cell_size": cell_size
+    }
+    save_config(config_data, CONFIG_FILE_PATH)
+
     # Create the canvas and generate the maze
-    window, canvas = create_canvas()
-    grid, start, end = generate_maze(GRID_SIZE)
+    window, canvas = create_canvas(cell_size, grid_size)
+    grid, start, end = generate_maze(cell_size, grid_size)
 
     # Save the maze to a file
     save_maze(grid, start, end, MAZE_FILE_PATH)
@@ -115,7 +133,7 @@ def main():
     grid, start, end = load_maze(MAZE_FILE_PATH)
 
     # Draw the maze on the canvas
-    draw_maze(canvas, grid, start, end)
+    draw_maze(canvas, cell_size, grid_size, grid, start, end)
 
     # Start the main tkinter loop
     window.mainloop()
