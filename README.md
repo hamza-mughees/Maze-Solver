@@ -28,9 +28,9 @@ git clone https://github.com/hamza-mughees/AI-Assignment1.git
 
 To create a maze, navigate to the `src` directory and run the `create_maze.py` script with the desired grid size and cell size:
 ```
-python create_maze.py --grid <grid size> --cell <cell size>
+python create_maze.py --grid <grid_size> --cell <cell_size>
 ```
-This command will generate a maze with the provided grid size and cell size configuration and save it as `maze.json` in the res directory. The script will also create a `config.json` file in the same directory, which contains the configuration of the maze.
+This command will generate a maze with the provided grid size and cell size configuration and save it as `maze.json` in the `res` directory. The script will also create a `config.json` file in the same directory, which contains the configuration of the maze.
 
 ### Solving a Maze
 

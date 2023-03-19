@@ -18,7 +18,7 @@ def create_canvas(cell_size, grid_size):
     canvas.pack()
     return window, canvas
 
-def generate_maze(cell_size, grid_size):
+def generate_maze(grid_size):
     # Create the grid as a 2D list of cells
     grid = [[{'top': True, 'bottom': True, 'left': True, 'right': True} for _ in range(grid_size)] for _ in range(grid_size)]
 
@@ -123,7 +123,7 @@ def main():
 
     # Create the canvas and generate the maze
     window, canvas = create_canvas(cell_size, grid_size)
-    grid, start, end = generate_maze(cell_size, grid_size)
+    grid, start, end = generate_maze(grid_size)
 
     # Save the maze to a file
     save_maze(grid, start, end, MAZE_FILE_PATH)

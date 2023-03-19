@@ -33,7 +33,6 @@ def get_unwalled_neighbors(maze, x, y):
                 
     return neighbors
 
-# @profile
 def depth_first_search(maze, start, end):
     start_time = datetime.now()  # Start time
     
@@ -58,7 +57,6 @@ def depth_first_search(maze, start, end):
                 
     return None, None, nodes_visited
 
-# @profile
 def breadth_first_search(maze, start, end):
     start_time = datetime.now()  # Start time
     
@@ -86,7 +84,6 @@ def breadth_first_search(maze, start, end):
 def heuristic(x, y, end):
     return abs(x - end[0]) + abs(y - end[1])
 
-# @profile
 def a_star(maze, start, end):
     start_time = datetime.now()  # Start time
 
@@ -162,7 +159,6 @@ def path_from_policy(policy, start, end):
 
     return path
 
-# @profile
 def mdp_value_iteration(maze, start, end):
     start_time = datetime.now()  # Start time
     
@@ -204,7 +200,6 @@ def mdp_value_iteration(maze, start, end):
 
     return path, time_complexity, states_visited
 
-# @profile
 def mdp_policy_iteration(maze, start, end):
     start_time = datetime.now()  # Start time
     
